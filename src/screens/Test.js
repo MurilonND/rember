@@ -3,7 +3,7 @@ import React from 'react'
 import { signOut } from 'firebase/auth'
 import { FIREBASE_AUTH } from '../../firebase'
 
-export default function Test() {
+export default function Test({ navigation }) {
     const handleLogout = async () => {
         await signOut(FIREBASE_AUTH);
     }
