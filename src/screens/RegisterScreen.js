@@ -1,18 +1,20 @@
 import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import React, { useState } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth'
+import { createUserWithEmailAndPassword } from 'firebase/auth'
 import { FIREBASE_AUTH } from '../../firebase'
 
 const LoginScreen = ({ navigation }) => {
+    const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
 
-  const goToRegister = () => navigation.navigate('Register')
+  const goToLogin = () => navigation.navigate('Login')
 
-  const handleLogin = async ()=> {
+  const handleRegister = async ()=> {
     if(email && password) {
       try{
-        await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+        await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+        goToLogin
       }catch(e){
         console.log("ERROR: ", e.message);
       }
@@ -24,6 +26,11 @@ const LoginScreen = ({ navigation }) => {
     style={styles.container}
     behavior='padding'>
       <View style={styles.inputContainer}>
+      <TextInput placeholder='Username'  
+        value= { username }
+        onChangeText={ text => setUsername(text) }
+        style={styles.input}
+        />
         <TextInput placeholder='Email'  
         value= { email }
         onChangeText={ text => setEmail(text) }
@@ -38,18 +45,18 @@ const LoginScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.buttomContainer}>
-        <TouchableOpacity
-          onPress={handleLogin}
-          style={styles.buttom}
-        >
-          <Text style={styles.buttomText}>Login</Text>
+      <TouchableOpacity
+          onPress={handleRegister}
+          style={[styles.buttom, styles.buttom]}
+        > 
+          <Text style={[styles.buttomText]}>Register</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={goToRegister}
+          onPress={goToLogin}
           style={styles.paddingVertical}
-        > 
-          <Text style={[styles.buttomOutilneText]}>Go to Register</Text>
+        >
+          <Text style={styles.buttomOutilneText}>Go back to Login</Text>
         </TouchableOpacity>
       </View>
     </View>
