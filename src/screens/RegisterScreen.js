@@ -7,19 +7,21 @@ import {
   Image,
 } from "react-native";
 import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
+import { createUserWithEmailAndPassword } from "firebase/auth";
 import { FIREBASE_AUTH } from "../../firebase";
 
 const LoginScreen = ({ navigation }) => {
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const goToRegister = () => navigation.navigate("Register");
+  const goToLogin = () => navigation.navigate("Login");
 
-  const handleLogin = async () => {
+  const handleRegister = async () => {
     if (email && password) {
       try {
-        await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+        await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+        goToLogin;
       } catch (e) {
         console.log("ERROR: ", e.message);
       }
@@ -30,13 +32,15 @@ const LoginScreen = ({ navigation }) => {
     <View style={styles.container} behavior="padding">
       <Image source={require("../../assets/logo.png")} style={styles.logo} />
       <View style={styles.sizeBoxH}></View>
-      <View style={styles.descriptionContainer}>
-        <Text style={styles.description}>
-          Train your memory by logging in every day and challenging yourself
-          with custom cards and collections made by you or other people.
-        </Text>
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder="Username"
+          value={username}
+          onChangeText={(text) => setUsername(text)}
+          style={styles.input}
+        />
       </View>
-      <View style={styles.sizeBoxH}></View>
+
       <View style={styles.inputContainer}>
         <TextInput
           email
@@ -57,12 +61,15 @@ const LoginScreen = ({ navigation }) => {
       </View>
 
       <View style={styles.buttomContainer}>
-        <TouchableOpacity onPress={handleLogin} style={styles.buttom}>
-          <Text style={styles.buttomText}>Login</Text>
+        <TouchableOpacity
+          onPress={handleRegister}
+          style={[styles.buttom, styles.buttom]}
+        >
+          <Text style={[styles.buttomText]}>Register</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={goToRegister} style={styles.paddingVertical}>
-          <Text style={[styles.buttomOutilneText]}>Go to Register</Text>
+        <TouchableOpacity onPress={goToLogin} style={styles.paddingVertical}>
+          <Text style={styles.buttomOutilneText}>Go back to Login</Text>
         </TouchableOpacity>
       </View>
     </View>
