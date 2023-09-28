@@ -1,117 +1,154 @@
-import { StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
-import React, { useState } from 'react'
-import { signInWithEmailAndPassword } from 'firebase/auth'
-import { FIREBASE_AUTH } from '../../firebase'
+import {
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+  Image,
+} from "react-native";
+import React, { useState } from "react";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { FIREBASE_AUTH } from "../../firebase";
 
 const LoginScreen = ({ navigation }) => {
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
-  const goToRegister = () => navigation.navigate('Register')
+  const goToRegister = () => navigation.navigate("Register");
 
-  const handleLogin = async ()=> {
-    if(email && password) {
-      try{
+  const handleLogin = async () => {
+    if (email && password) {
+      try {
         await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
-      }catch(e){
+      } catch (e) {
         console.log("ERROR: ", e.message);
       }
     }
-  }
+  };
 
   return (
-    <View
-    style={styles.container}
-    behavior='padding'>
+    <View style={styles.container} behavior="padding">
+      <Image source={require("../../assets/logo.png")} style={styles.logo} />
+      <View style={styles.sizeBoxH}></View>
+      <View style={styles.descriptionContainer}>
+        <Text style={styles.description}>
+          Train your memory by logging in every day and challenging yourself
+          with custom cards and collections made by you or other people.
+        </Text>
+      </View>
+      <View style={styles.sizeBoxH}></View>
       <View style={styles.inputContainer}>
-        <TextInput placeholder='Email'  
-        value= { email }
-        onChangeText={ text => setEmail(text) }
-        style={styles.input}
+        <TextInput
+          email
+          placeholder="Email"
+          value={email}
+          onChangeText={(text) => setEmail(text)}
+          style={styles.input}
         />
-        <TextInput placeholder='Senha'  
-        value= { password }
-        onChangeText={ text => setPassword(text) }
-        style={styles.input}
-        secureTextEntry
+      </View>
+      <View style={styles.inputContainer}>
+        <TextInput
+          placeholder="Senha"
+          value={password}
+          onChangeText={(text) => setPassword(text)}
+          style={styles.input}
+          secureTextEntry
         />
       </View>
 
       <View style={styles.buttomContainer}>
-        <TouchableOpacity
-          onPress={handleLogin}
-          style={styles.buttom}
-        >
+        <TouchableOpacity onPress={handleLogin} style={styles.buttom}>
           <Text style={styles.buttomText}>Login</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity
-          onPress={goToRegister}
-          style={styles.paddingVertical}
-        > 
+        <TouchableOpacity onPress={goToRegister} style={styles.paddingVertical}>
           <Text style={[styles.buttomOutilneText]}>Go to Register</Text>
         </TouchableOpacity>
       </View>
     </View>
-  )
-}
+  );
+};
 
-export default LoginScreen
+export default LoginScreen;
 
 const styles = StyleSheet.create({
-  container:{
+  container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
   },
 
-  inputContainer:{
-    width: '80%'
+  descriptionContainer: {
+    paddingHorizontal: 30,
   },
 
-  paddingVertical:{
-    paddingVertical:5
+  description: {
+    textAlign: "center",
   },
 
-  input:{
-    backgroundColor: 'white',
+  logo: {
+    // width: null,
+    height: 110,
+    resizeMode: "contain",
+    // paddingBottom: 20
+  },
+
+  sizeBoxH: {
+    height: 30,
+  },
+
+  inputContainer: {
+    width: "80%",
+    paddingTop: 5,
+  },
+
+  paddingVertical: {
+    paddingVertical: 5,
+  },
+
+  input: {
+    backgroundColor: "white",
     paddingHorizontal: 15,
     paddingVertical: 10,
     borderRadius: 10,
+    borderColor: "#b0b0b0",
+    borderWidth: 1,
     marginTop: 5,
   },
 
-  buttomContainer:{
-    width: '60%',
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginTop: 40,
+  buttomContainer: {
+    width: "60%",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 30,
   },
 
-  buttom:{
-    backgroundColor: '#0782F9',
-    width: '100%',
-    padding:15,
+  buttom: {
+    backgroundColor: "#0084B8",
+    width: "100%",
+    padding: 15,
     borderRadius: 10,
-    alignItems: 'center',
+    alignItems: "center",
   },
 
-  buttomOutilne:{
-    backgroundColor: 'white',
+  buttomOutilne: {
+    backgroundColor: "white",
     marginTop: 5,
-    borderColor: '#0782F9',
+    borderColor: "#0782F9",
     borderWidth: 2,
   },
 
   buttomText: {
-    color: 'white',
-    fontWeight: '700',
+    color: "white",
+    fontWeight: "700",
     fontSize: 16,
   },
 
   buttomOutilneText: {
-    color: '#0782F9',
-    fontWeight: '700',
+    color: "#0084B8",
+    fontWeight: "700",
     fontSize: 16,
+    // textDecorationLine: 'underline'
   },
-})
+});
