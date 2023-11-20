@@ -8,7 +8,8 @@ import {
 } from "react-native";
 import React, { useState } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { FIREBASE_AUTH } from "../../firebase";
+import { FIREBASE_AUTH, FIRESTOR_DB } from "../../firebase";
+import { addDoc, collection } from "firebase/firestore";
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -17,10 +18,22 @@ const LoginScreen = ({ navigation }) => {
 
   const goToLogin = () => navigation.navigate("Login");
 
+  const createUser = async (email) => {
+    await addDoc(collection(FIRESTOR_DB, "users"), {
+      email: email,
+      cards: [],
+      collections: 0,
+      easy: 0,
+      medium: 0,
+      hard: 0,
+      retry: 0,
+    })
+  }
+
   const handleRegister = async () => {
     if (email && password) {
       try {
-        await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+        await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password).then((user) => createUser(user._tokenResponse.email));
         goToLogin;
       } catch (e) {
         console.log("ERROR: ", e.message);

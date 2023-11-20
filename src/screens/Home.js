@@ -2,17 +2,25 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import React from "react";
 
 export default function Home({ navigation }) {
+  const goToQuizzes = () => navigation.navigate("Quizzes");
+  const goToCollections = () => navigation.navigate("Collections");
+  const goToStatistics = () => navigation.navigate("Statistics");
+
+
   return (
     <View style={styles.container} behavior="padding">
-        <TouchableOpacity style={[styles.cardButtom, {backgroundColor: '#B66CFF'}]}>
-          <Text style={styles.cardButtomText}>Daily Chalenges</Text>
+        <TouchableOpacity onPress={goToQuizzes}
+          style={[styles.cardButtom, {backgroundColor: '#B66CFF'}]}>
+          <Text style={styles.cardButtomText}>Quizzes</Text>
         </TouchableOpacity>
         <View style={styles.sizeBoxH}></View>
-        <TouchableOpacity style={[styles.cardButtom, {backgroundColor: '#6C7BFF'}]}>
+        <TouchableOpacity onPress={goToCollections}
+         style={[styles.cardButtom, {backgroundColor: '#6C7BFF'}]}>
           <Text style={styles.cardButtomText}>Collections</Text>
         </TouchableOpacity>
         <View style={styles.sizeBoxH}></View>
-        <TouchableOpacity style={[styles.cardButtom, {backgroundColor: '#6CFF7B'}]}>
+        <TouchableOpacity onPress={goToStatistics}
+          style={[styles.cardButtom, {backgroundColor: '#6CFF7B'}]}>
           <Text style={styles.cardButtomText}>Statistics</Text>
         </TouchableOpacity>
     </View>
