@@ -15,10 +15,10 @@ export default function StatisticsScreen({ navigation }) {
     var currentUser = FIREBASE_AUTH.currentUser;
     var currentUserEmail = currentUser.email;
 
-    const uCollection = collection(FIRESTOR_DB, 'users');
+    const uCollection = collection(FIRESTOR_DB, "users");
     const uQuerys = query(uCollection, where("email", "==", currentUserEmail));
     const snapshot = await getDocs(uQuerys);
-    const user = snapshot.docs.map(doc => doc.data());
+    const user = snapshot.docs.map((doc) => doc.data());
 
     setCards(user[0].cards.length ?? 0);
     setCollections(user[0].collections.length ?? 0);
@@ -26,23 +26,21 @@ export default function StatisticsScreen({ navigation }) {
     setMedium(user[0].medium ?? 0);
     setHard(user[0].hard ?? 0);
     setRetry(user[0].retry ?? 0);
-  }
+  };
 
-  useEffect(
-    () => {
-      GetData();
-    }, []
-  );
+  useEffect(() => {
+    GetData();
+  }, []);
 
   return (
     <View style={styles.container} behavior="padding">
-          <Text style={styles.item}>Cards: {cards}</Text>
-          <Text style={styles.item}>Collections: {collections}</Text>
-          <Text style={styles.item}>Anwsers:</Text>
-          <Text style={[styles.sub_item]}>Easy: {easy}</Text>
-          <Text style={[styles.sub_item]}>Medium: {medium}</Text>
-          <Text style={[styles.sub_item]}>Hard: {hard}</Text>
-          <Text style={[styles.sub_item]}>Retry: {retry}</Text>
+      <Text style={styles.item}>Cards: {cards}</Text>
+      <Text style={styles.item}>Collections: {collections}</Text>
+      <Text style={styles.item}>Anwsers:</Text>
+      <Text style={[styles.sub_item]}>Easy: {easy}</Text>
+      <Text style={[styles.sub_item]}>Medium: {medium}</Text>
+      <Text style={[styles.sub_item]}>Hard: {hard}</Text>
+      <Text style={[styles.sub_item]}>Retry: {retry}</Text>
     </View>
   );
 }
@@ -58,11 +56,11 @@ const styles = StyleSheet.create({
 
   sub_item: {
     paddingLeft: 15,
-    fontSize: 20
+    fontSize: 20,
   },
 
   item: {
     fontSize: 24,
-    fontWeight: "bold"
-  }
+    fontWeight: "bold",
+  },
 });

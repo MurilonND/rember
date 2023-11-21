@@ -1,4 +1,10 @@
-import { FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  FlatList,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { getDocs, collection, where, query } from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { FIREBASE_AUTH, FIRESTOR_DB } from "../../firebase";
@@ -10,36 +16,41 @@ export default function QuizzesScreen({ navigation }) {
     var currentUser = FIREBASE_AUTH.currentUser;
     var currentUserEmail = currentUser.email;
 
-    const uCollection = collection(FIRESTOR_DB, 'users');
+    const uCollection = collection(FIRESTOR_DB, "users");
     const uQuerys = query(uCollection, where("email", "==", currentUserEmail));
     const snapshot = await getDocs(uQuerys);
-    const user = snapshot.docs.map(doc => doc.data());
+    const user = snapshot.docs.map((doc) => doc.data());
 
     setCollections(user[0].collections ?? []);
-  }
+  };
 
-  useEffect(
-    () => {
-      GetData();
-    }, []
-  );
+  useEffect(() => {
+    GetData();
+  }, []);
 
-  const goToQuizz = () => {
-    navigation.navigate("Quiz");
-  }
+  const goToQuizz = (collectionId) => {
+    navigation.navigate("Quiz", {
+      collectionId: collectionId,
+    });
+  };
 
   return (
     <View style={styles.container} behavior="padding">
-        <FlatList
+      <FlatList
         data={collections}
-        renderItem={({item})=><View>
-            <TouchableOpacity onPress={goToQuizz}
-              style={styles.cardButtom}>
-                <Text numberOfLines={1} style={styles.cardButtomText}>{item}</Text>
+        renderItem={({ item }) => (
+          <View>
+            <TouchableOpacity
+              onPress={() => goToQuizz(item)}
+              style={styles.cardButtom}
+            >
+              <Text numberOfLines={1} style={styles.cardButtomText}>
+                {item}
+              </Text>
             </TouchableOpacity>
           </View>
-          }
-        />
+        )}
+      />
     </View>
   );
 }

@@ -1,5 +1,20 @@
-import { FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { getDocs, collection, where, query, updateDoc, arrayUnion } from "firebase/firestore";
+import {
+  FlatList,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  getDocs,
+  collection,
+  where,
+  query,
+  updateDoc,
+  arrayUnion,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { FIREBASE_AUTH, FIRESTOR_DB } from "../../firebase";
 
@@ -13,50 +28,55 @@ export default function CollectionsScreen({ navigation }) {
     var currentUser = FIREBASE_AUTH.currentUser;
     var currentUserEmail = currentUser.email;
 
-    const uCollection = collection(FIRESTOR_DB, 'users');
+    const uCollection = collection(FIRESTOR_DB, "users");
     const uQuerys = query(uCollection, where("email", "==", currentUserEmail));
     const snapshot = await getDocs(uQuerys);
     setUserRef(snapshot.docs[0].ref);
-    const user = snapshot.docs.map(doc => doc.data());
+    const user = snapshot.docs.map((doc) => doc.data());
 
     setCollections(user[0].collections ?? []);
-  }
+  };
 
   const openModal = () => {
-    setVisible(true)
-  }
+    setVisible(true);
+  };
 
   const closeModal = () => {
-    setVisible(false)
-  }
+    setVisible(false);
+  };
 
   const createCollection = async () => {
-    try{
+    try {
       await updateDoc(userRef, {
-      collections: arrayUnion(collectionName)
-    });
-    }catch(e) {
+        collections: arrayUnion(collectionName),
+      });
+    } catch (e) {
       console.log("ERROR: ", e.message);
     }
-    
+
     closeModal();
     GetData();
-  }
+  };
 
-  useEffect(
-    () => {
-      GetData();
-    }, []
-  );
+  useEffect(() => {
+    GetData();
+  }, []);
 
-  const goToCollection = () => {
-    navigation.navigate("Collection");
-  }
+  const goToCollection = (collectionId) => {
+    navigation.navigate("Collection", {
+      collectionId: collectionId,
+    });
+  };
 
   return (
     <View style={styles.container} behavior="padding">
       <View>
-        <Modal animationType="fade" transparent={true} visible={visible} style={{}}>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={visible}
+          style={{}}
+        >
           <View style={styles.modal}>
             <Text style={styles.modal_text}>Name the new Collection: </Text>
             <TextInput
@@ -64,7 +84,7 @@ export default function CollectionsScreen({ navigation }) {
               value={collectionName}
               onChangeText={(text) => setCollectionName(text)}
               style={styles.input}
-              />
+            />
             <View style={styles.row}>
               <TouchableOpacity
                 onPress={createCollection}
@@ -83,21 +103,26 @@ export default function CollectionsScreen({ navigation }) {
         </Modal>
       </View>
       <TouchableOpacity
-          onPress={openModal}
-          style={[styles.buttom, styles.buttom]}
-        >
-          <Text style={[styles.buttomText]}>Create New Collection</Text>
-        </TouchableOpacity>
-        <FlatList
+        onPress={openModal}
+        style={[styles.buttom, styles.buttom]}
+      >
+        <Text style={[styles.buttomText]}>Create New Collection</Text>
+      </TouchableOpacity>
+      <FlatList
         data={collections}
-        renderItem={({item})=><View>
-            <TouchableOpacity onPress={goToCollection}
-              style={[styles.cardButtom]}>
-                <Text numberOfLines={1} style={styles.cardButtomText}>{item}</Text>
+        renderItem={({ item }) => (
+          <View>
+            <TouchableOpacity
+              onPress={() => goToCollection(item)}
+              style={[styles.cardButtom]}
+            >
+              <Text numberOfLines={1} style={styles.cardButtomText}>
+                {item}
+              </Text>
             </TouchableOpacity>
           </View>
-          }
-        />
+        )}
+      />
     </View>
   );
 }
@@ -160,19 +185,19 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     elevation: 10,
-    backgroundColor: 'white'
+    backgroundColor: "white",
   },
 
-  modal_text:{
-    fontSize: 20
+  modal_text: {
+    fontSize: 20,
   },
 
   row: {
     paddingTop: 15,
-    justifyContent: 'space-around',
-    flexDirection: 'row'
+    justifyContent: "space-around",
+    flexDirection: "row",
   },
-  
+
   cardButtom: {
     marginTop: 10,
     padding: 12,

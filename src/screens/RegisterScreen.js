@@ -27,13 +27,17 @@ const LoginScreen = ({ navigation }) => {
       medium: 0,
       hard: 0,
       retry: 0,
-    })
-  }
+    });
+  };
 
   const handleRegister = async () => {
     if (email && password) {
       try {
-        await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password).then((user) => createUser(user._tokenResponse.email));
+        await createUserWithEmailAndPassword(
+          FIREBASE_AUTH,
+          email,
+          password
+        ).then((user) => createUser(user._tokenResponse.email));
         goToLogin;
       } catch (e) {
         console.log("ERROR: ", e.message);

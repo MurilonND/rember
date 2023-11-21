@@ -1,9 +1,26 @@
-import { FlatList, Modal, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import { getDocs, collection, where, query, updateDoc, arrayUnion } from "firebase/firestore";
+import {
+  FlatList,
+  Modal,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
+import {
+  getDocs,
+  collection,
+  where,
+  query,
+  updateDoc,
+  arrayUnion,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { FIREBASE_AUTH, FIRESTOR_DB } from "../../firebase";
 
-export default function CollectionScreen({ navigation }) {
+export default function CollectionScreen({ route }) {
+  const collectionId = route.params.collectionId;
+
   const [cards, setCards] = useState();
   const [cardQuestion, setCardQuestion] = useState();
   const [cardAnswer, setCardAnswer] = useState();
@@ -14,48 +31,58 @@ export default function CollectionScreen({ navigation }) {
     var currentUser = FIREBASE_AUTH.currentUser;
     var currentUserEmail = currentUser.email;
 
-    const uCard = collection(FIRESTOR_DB, 'users');
+    const uCard = collection(FIRESTOR_DB, "users");
     const uQuerys = query(uCard, where("email", "==", currentUserEmail));
     const snapshot = await getDocs(uQuerys);
     setUserRef(snapshot.docs[0].ref);
-    const user = snapshot.docs.map(doc => doc.data());
-
-    setCards(user[0].cards ?? []);
-  }
+    const user = snapshot.docs.map((doc) => doc.data());
+    const userCards = user[0].cards.filter(
+      (item) => item.collection == collectionId
+    );
+    setCards(userCards ?? []);
+  };
 
   const openModal = () => {
-    setVisible(true)
-  }
+    setVisible(true);
+  };
 
   const closeModal = () => {
-    setVisible(false)
-  }
+    setVisible(false);
+  };
 
   const createCard = async () => {
-    try{
-      var date = new Date().getTime();      ;
-      var card = cardQuestion + ' -=/=- ' + cardAnswer + ' -=/=- ' + date;
+    try {
+      var date = new Date().getTime();
+      var card = {
+        quenstion: cardQuestion,
+        answer: cardAnswer,
+        collection: collectionId,
+        timestamp: date,
+      };
       await updateDoc(userRef, {
-      cards: arrayUnion(card)
-    });
-    }catch(e) {
+        cards: arrayUnion(card),
+      });
+    } catch (e) {
       console.log("ERROR: ", e.message);
     }
-    
+
     closeModal();
     GetData();
-  }
+  };
 
-  useEffect(
-    () => {
-      GetData();
-    }, []
-  );
+  useEffect(() => {
+    GetData();
+  }, []);
 
   return (
     <View style={styles.container} behavior="padding">
       <View>
-        <Modal animationType="fade" transparent={true} visible={visible} style={{}}>
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={visible}
+          style={{}}
+        >
           <View style={styles.modal}>
             <Text style={styles.modal_text}>Create the new Card: </Text>
             <TextInput
@@ -63,47 +90,49 @@ export default function CollectionScreen({ navigation }) {
               value={cardQuestion}
               onChangeText={(text) => setCardQuestion(text)}
               style={styles.input}
-              />
-              <TextInput
+            />
+            <TextInput
               placeholder="Answer"
               value={cardAnswer}
               onChangeText={(text) => setCardAnswer(text)}
               style={styles.input}
-              />
+            />
             <View style={styles.row}>
-            <TouchableOpacity
-          onPress={createCard}
-          style={[styles.confirm_buttom]}
-        >
-          <Text style={[styles.buttomText]}>Confirm</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={closeModal}
-          style={[styles.cancel_buttom]}
-        >
-          <Text style={[styles.buttomText]}>Cancel</Text>
-        </TouchableOpacity>
+              <TouchableOpacity
+                onPress={createCard}
+                style={[styles.confirm_buttom]}
+              >
+                <Text style={[styles.buttomText]}>Confirm</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                onPress={closeModal}
+                style={[styles.cancel_buttom]}
+              >
+                <Text style={[styles.buttomText]}>Cancel</Text>
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
       </View>
       <TouchableOpacity
-          onPress={openModal}
-          style={[styles.buttom, styles.buttom]}
-        >
-          <Text style={[styles.buttomText]}>Create New Card</Text>
-        </TouchableOpacity>
-        <FlatList
+        onPress={openModal}
+        style={[styles.buttom, styles.buttom]}
+      >
+        <Text style={[styles.buttomText]}>Create New Card</Text>
+      </TouchableOpacity>
+      <FlatList
         data={cards}
-        renderItem={({item})=><View>
-            <TouchableOpacity
-              style={[styles.cardButtom]}>
-                <Text numberOfLines={1} style={styles.cardButtomText}>{item.split(' -=/=- ')[0]}</Text>
-                <Text numberOfLines={1}>{item.split(' -=/=- ')[1]}</Text>
+        renderItem={({ item }) => (
+          <View>
+            <TouchableOpacity style={[styles.cardButtom]}>
+              <Text numberOfLines={1} style={styles.cardButtomText}>
+                {item.quenstion}
+              </Text>
+              <Text numberOfLines={1}>{item.answer}</Text>
             </TouchableOpacity>
           </View>
-          }
-        />
+        )}
+      />
     </View>
   );
 }
@@ -166,19 +195,19 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     elevation: 10,
-    backgroundColor: 'white'
+    backgroundColor: "white",
   },
 
-  modal_text:{
-    fontSize: 20
+  modal_text: {
+    fontSize: 20,
   },
 
   row: {
     paddingTop: 15,
-    justifyContent: 'space-around',
-    flexDirection: 'row'
+    justifyContent: "space-around",
+    flexDirection: "row",
   },
-  
+
   cardButtom: {
     marginTop: 10,
     padding: 12,

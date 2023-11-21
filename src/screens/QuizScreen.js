@@ -1,110 +1,169 @@
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { getDocs, collection, where, query } from "firebase/firestore";
+import {
+  getDocs,
+  collection,
+  where,
+  query,
+  updateDoc,
+  increment,
+} from "firebase/firestore";
 import React, { useEffect, useState } from "react";
 import { FIREBASE_AUTH, FIRESTOR_DB } from "../../firebase";
 
+export default function QuizScreen({ route, navigation }) {
+  const collectionId = route.params.collectionId;
 
-export default function QuizScreen({ navigation }) {
   const [visible, setVisible] = useState(false);
   const [retry, setRetry] = useState(0);
   const [hard, setHard] = useState(0);
   const [medium, setMedium] = useState(0);
   const [easy, setEasy] = useState(0);
-  const [userStats, setUserStats] = useState();
+  const [cards, setCards] = useState([
+    { answer: "", collection: "", quenstion: "", timestamp: 0 },
+  ]);
+  const [cardIndex, setCardIndex] = useState(0);
+  const [userRef, setUserRef] = useState();
 
   const GetData = async () => {
     var currentUser = FIREBASE_AUTH.currentUser;
     var currentUserEmail = currentUser.email;
+    var date = new Date().getTime();
 
-    const uCollection = collection(FIRESTOR_DB, 'users');
+    const uCollection = collection(FIRESTOR_DB, "users");
     const uQuerys = query(uCollection, where("email", "==", currentUserEmail));
     const snapshot = await getDocs(uQuerys);
-    const user = snapshot.docs.map(doc => doc.data());
+    setUserRef(snapshot.docs[0].ref);
+    const user = snapshot.docs.map((doc) => doc.data());
+    const userCards = user[0].cards.filter(
+      (item) => item.collection == collectionId
+    );
+    const availableCards = userCards.filter((item) => item.timestamp <= date);
+    setCards(availableCards ?? []);
+  };
 
-    setUserStats(user[0].cards ?? []);
-  }
+  const updateEasyStatistics = async () => {
+    try {
+      await updateDoc(userRef, {
+        easy: increment(1),
+      });
+    } catch (e) {
+      console.log("ERROR: ", e.message);
+    }
+  };
 
-  useEffect(
-    () => {
-      GetData();
-    }, []
-  );
+  const updateMediumStatistics = async () => {
+    try {
+      await updateDoc(userRef, {
+        medium: increment(1),
+      });
+    } catch (e) {
+      console.log("ERROR: ", e.message);
+    }
+  };
+
+  const updateHardStatistics = async () => {
+    try {
+      await updateDoc(userRef, {
+        hard: increment(1),
+      });
+    } catch (e) {
+      console.log("ERROR: ", e.message);
+    }
+  };
+
+  const updateRetryStatistics = async () => {
+    try {
+      await updateDoc(userRef, {
+        retry: increment(1),
+      });
+    } catch (e) {
+      console.log("ERROR: ", e.message);
+    }
+  };
+
+  useEffect(() => {
+    GetData();
+  }, []);
 
   const showAnswer = () => {
-    setVisible(true)
-  }
+    setVisible(true);
+  };
 
   const hideAnswer = () => {
-    setVisible(false)
-  }
+    setVisible(false);
+  };
 
   const retryButton = () => {
-    setRetry(retry + 1)
-    hideAnswer()
-  }
+    setRetry(retry + 1);
+    hideAnswer();
+    updateRetryStatistics();
+
+    if (cardIndex < cards.length - 1) setCardIndex(cardIndex + 1);
+  };
 
   const hardButton = () => {
-    setHard(hard + 1)
-    hideAnswer()
-  }
+    setHard(hard + 1);
+    hideAnswer();
+    updateHardStatistics();
+
+    if (cardIndex < cards.length - 1) setCardIndex(cardIndex + 1);
+  };
 
   const mediumButton = () => {
-    setMedium(medium + 1)
-    hideAnswer()
-  }
+    setMedium(medium + 1);
+    hideAnswer();
+    updateMediumStatistics();
+
+    if (cardIndex < cards.length - 1) setCardIndex(cardIndex + 1);
+  };
 
   const easyButton = () => {
-    setEasy(easy + 1)
-    hideAnswer()
-  }
+    setEasy(easy + 1);
+    hideAnswer();
+    updateEasyStatistics();
+
+    if (cardIndex < cards.length - 1) setCardIndex(cardIndex + 1);
+  };
 
   return (
     <View style={styles.container} behavior="padding">
-          <View style={styles.row}>
-              <Text style={[styles.paddingHead, styles.retry_text]}>{retry}</Text>
-              <Text style={[styles.paddingHead, styles.hard_text]}>{hard}</Text>
-              <Text style={[styles.paddingHead, styles.medium_text]}>{medium}</Text>
-              <Text style={[styles.paddingHead, styles.easy_text]}>{easy}</Text>
-          </View>
+      <View style={styles.row}>
+        <Text style={[styles.paddingHead, styles.retry_text]}>{retry}</Text>
+        <Text style={[styles.paddingHead, styles.hard_text]}>{hard}</Text>
+        <Text style={[styles.paddingHead, styles.medium_text]}>{medium}</Text>
+        <Text style={[styles.paddingHead, styles.easy_text]}>{easy}</Text>
+      </View>
       <View style={styles.question_container}>
-        <Text style={styles.question_text}>Question</Text>
+        <Text style={styles.question_text}>{cards[cardIndex].quenstion}</Text>
         <View style={styles.answer_container}>
-          {visible?<Text style={styles.answer_text}>Answer</Text>:null}
-          {!visible?<TouchableOpacity
-                style={[styles.buttom]}
-                onPress={showAnswer}
-              >
-                <Text style={[styles.buttomText]}>Show Answer</Text>
-          </TouchableOpacity>:null}
-         </View>
+          {visible ? (
+            <Text style={styles.answer_text}>{cards[cardIndex].answer}</Text>
+          ) : null}
+          {!visible ? (
+            <TouchableOpacity style={[styles.buttom]} onPress={showAnswer}>
+              <Text style={[styles.buttomText]}>Show Answer</Text>
+            </TouchableOpacity>
+          ) : null}
+        </View>
       </View>
       <View>
         <View style={styles.row}>
-          <TouchableOpacity
-                style={[styles.retry_buttom]}
-                onPress={retryButton}
-              >
-                <Text style={[styles.buttomText]}>Retry</Text>
+          <TouchableOpacity style={[styles.retry_buttom]} onPress={retryButton}>
+            <Text style={[styles.buttomText]}>Retry</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-                style={[styles.hard_buttom]}
-                onPress={hardButton}
-              >
-                <Text style={[styles.buttomText]}>Hard</Text>
+          <TouchableOpacity style={[styles.hard_buttom]} onPress={hardButton}>
+            <Text style={[styles.buttomText]}>Hard</Text>
           </TouchableOpacity>
         </View>
         <View style={styles.row}>
           <TouchableOpacity
-                style={[styles.medium_buttom]}
-                onPress={mediumButton}
-              >
-                <Text style={[styles.buttomText]}>Medium</Text>
+            style={[styles.medium_buttom]}
+            onPress={mediumButton}
+          >
+            <Text style={[styles.buttomText]}>Medium</Text>
           </TouchableOpacity>
-          <TouchableOpacity
-                style={[styles.easy_buttom]}
-                onPress={easyButton}
-              >
-                <Text style={[styles.buttomText]}>Easy</Text>
+          <TouchableOpacity style={[styles.easy_buttom]} onPress={easyButton}>
+            <Text style={[styles.buttomText]}>Easy</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -124,23 +183,23 @@ const styles = StyleSheet.create({
 
   question_container: {
     justifyContent: "center",
-    alignItems: "center",  
+    alignItems: "center",
   },
 
   question_text: {
     fontSize: 20,
-    fontWeight: 'bold'
+    fontWeight: "bold",
   },
 
   answer_container: {
     paddingTop: 20,
     justifyContent: "center",
-    alignItems: "center",  
+    alignItems: "center",
   },
 
   answer_text: {
     fontSize: 20,
-    fontWeight: 'normal'
+    fontWeight: "normal",
   },
 
   paddingHead: {
@@ -149,26 +208,26 @@ const styles = StyleSheet.create({
 
   retry_text: {
     fontSize: 16,
-    color: 'red',
-    textDecorationLine: 'underline',
+    color: "red",
+    textDecorationLine: "underline",
   },
 
   hard_text: {
     fontSize: 16,
-    color: 'orange',
-    textDecorationLine: 'underline',
+    color: "orange",
+    textDecorationLine: "underline",
   },
 
   medium_text: {
     fontSize: 16,
-    color: 'blue',
-    textDecorationLine: 'underline',
+    color: "blue",
+    textDecorationLine: "underline",
   },
 
   easy_text: {
     fontSize: 16,
-    color: 'green',
-    textDecorationLine: 'underline',
+    color: "green",
+    textDecorationLine: "underline",
   },
 
   buttom: {
@@ -232,19 +291,19 @@ const styles = StyleSheet.create({
     padding: 20,
     borderRadius: 20,
     elevation: 10,
-    backgroundColor: 'white'
+    backgroundColor: "white",
   },
 
-  modal_text:{
-    fontSize: 20
+  modal_text: {
+    fontSize: 20,
   },
 
   row: {
     paddingTop: 15,
-    justifyContent: 'space-around',
-    flexDirection: 'row'
+    justifyContent: "space-around",
+    flexDirection: "row",
   },
-  
+
   cardButtom: {
     marginTop: 10,
     padding: 12,

@@ -14,7 +14,6 @@ import CollectionsScreen from "./src/screens/CollectionsScreen";
 import QuizScreen from "./src/screens/QuizScreen";
 import CollectionScreen from "./src/screens/CollectionScreen";
 
-
 const Stack = createNativeStackNavigator();
 // const InsideStack = createNativeStackNavigator();
 
@@ -33,8 +32,20 @@ const handleLogout = async () => {
 
 function HeaderHome({ navigation }) {
   return (
-    <View style={{flex: 1, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: "space-between",}}>
-      <Text style={{color: 'white', fontWeight: "bold", padding: 5, fontSize: 22}}>Home</Text>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "row",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <Text
+        style={{ color: "white", fontWeight: "bold", padding: 5, fontSize: 22 }}
+      >
+        Home
+      </Text>
       <TouchableOpacity onPress={handleLogout} style={styles.buttom}>
         <Text style={styles.buttomText}>Logout</Text>
       </TouchableOpacity>
@@ -42,10 +53,22 @@ function HeaderHome({ navigation }) {
   );
 }
 
-function HeaderPage({ navigation , pageName }) {
+function HeaderPage({ navigation, pageName }) {
   return (
-    <View style={{flex: 1, flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent: "space-between",}}>
-      <Text style={{color: 'white', fontWeight: "bold", padding: 5, fontSize: 22}}>{pageName}</Text>
+    <View
+      style={{
+        flex: 1,
+        flexDirection: "row",
+        flexWrap: "wrap",
+        alignItems: "center",
+        justifyContent: "space-between",
+      }}
+    >
+      <Text
+        style={{ color: "white", fontWeight: "bold", padding: 5, fontSize: 22 }}
+      >
+        {pageName}
+      </Text>
     </View>
   );
 }
@@ -56,22 +79,54 @@ export default function App() {
   if (user) {
     return (
       <NavigationContainer>
-        <Stack.Navigator initialRouteName="Home"
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: '#5893D4',
-          },
-          headerTintColor: 'white',
-          headerTitleStyle: {
-            fontWeight: 'bold',
-          },
-        }}>
-          <Stack.Screen name="Home" component={Home} options={{ headerTitle: () => <HeaderHome />}}/>
-          <Stack.Screen name="Quizzes" component={QuizzesScreen} options={{ headerTitle: () => <HeaderPage pageName="Quizzes" />}}/>
-          <Stack.Screen name="Quiz" component={QuizScreen} options={{ headerTitle: () => <HeaderPage pageName="Quiz" />}}/>
-          <Stack.Screen name="Collections" component={CollectionsScreen} options={{ headerTitle: () => <HeaderPage pageName="Collections" />}}/>
-          <Stack.Screen name="Collection" component={CollectionScreen} options={{ headerTitle: () => <HeaderPage pageName="Collection" />}}/>
-          <Stack.Screen name="Statistics" component={StatisticsScreen} options={{ headerTitle: () => <HeaderPage pageName="Statistics" />}}/>
+        <Stack.Navigator
+          initialRouteName="Home"
+          screenOptions={{
+            headerStyle: {
+              backgroundColor: "#5893D4",
+            },
+            headerTintColor: "white",
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
+          }}
+        >
+          <Stack.Screen
+            name="Home"
+            component={Home}
+            options={{ headerTitle: () => <HeaderHome /> }}
+          />
+          <Stack.Screen
+            name="Quizzes"
+            component={QuizzesScreen}
+            options={{ headerTitle: () => <HeaderPage pageName="Quizzes" /> }}
+          />
+          <Stack.Screen
+            name="Quiz"
+            component={QuizScreen}
+            options={{ headerTitle: () => <HeaderPage pageName="Quiz" /> }}
+          />
+          <Stack.Screen
+            name="Collections"
+            component={CollectionsScreen}
+            options={{
+              headerTitle: () => <HeaderPage pageName="Collections" />,
+            }}
+          />
+          <Stack.Screen
+            name="Collection"
+            component={CollectionScreen}
+            options={{
+              headerTitle: () => <HeaderPage pageName="Collection" />,
+            }}
+          />
+          <Stack.Screen
+            name="Statistics"
+            component={StatisticsScreen}
+            options={{
+              headerTitle: () => <HeaderPage pageName="Statistics" />,
+            }}
+          />
         </Stack.Navigator>
       </NavigationContainer>
     );
