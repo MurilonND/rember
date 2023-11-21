@@ -22,7 +22,7 @@ const LoginScreen = ({ navigation }) => {
     await addDoc(collection(FIRESTOR_DB, "users"), {
       email: email,
       cards: [],
-      collections: 0,
+      collections: [],
       easy: 0,
       medium: 0,
       hard: 0,
