@@ -54,6 +54,7 @@ export default function CollectionsScreen({ navigation }) {
       console.log("ERROR: ", e.message);
     }
 
+    setCollectionName("");
     closeModal();
     GetData();
   };

@@ -66,6 +66,8 @@ export default function CollectionScreen({ route }) {
       console.log("ERROR: ", e.message);
     }
 
+    setCardQuestion("");
+    setCardAnswer("");
     closeModal();
     GetData();
   };

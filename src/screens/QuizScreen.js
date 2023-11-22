@@ -18,6 +18,8 @@ export default function QuizScreen({ route, navigation }) {
   const [hard, setHard] = useState(0);
   const [medium, setMedium] = useState(0);
   const [easy, setEasy] = useState(0);
+  const [userDoc, setUser] = useState();
+  const [loading, setLoading] = useState(false);
   const [cards, setCards] = useState([
     { answer: "", collection: "", quenstion: "", timestamp: 0 },
   ]);
@@ -25,6 +27,7 @@ export default function QuizScreen({ route, navigation }) {
   const [userRef, setUserRef] = useState();
 
   const GetData = async () => {
+    setLoading(true);
     var currentUser = FIREBASE_AUTH.currentUser;
     var currentUserEmail = currentUser.email;
     var date = new Date().getTime();
@@ -34,38 +37,64 @@ export default function QuizScreen({ route, navigation }) {
     const snapshot = await getDocs(uQuerys);
     setUserRef(snapshot.docs[0].ref);
     const user = snapshot.docs.map((doc) => doc.data());
+    setUser(user[0])
     const userCards = user[0].cards.filter(
       (item) => item.collection == collectionId
     );
     const availableCards = userCards.filter((item) => item.timestamp <= date);
     setCards(availableCards ?? []);
+    setLoading(false);
   };
 
   const updateEasyStatistics = async () => {
+    var data = userDoc;
+    var newTimestamp = new Date();
+    newTimestamp.setDate(newTimestamp.getDate() + 4);
+    var timestamp = newTimestamp.getTime();
+
+    var index = userDoc.cards.findIndex((item) => item == cards[cardIndex]);
+
+    data.easy = data.easy + 1;
+    data.cards[index].timestamp = timestamp;
+
     try {
-      await updateDoc(userRef, {
-        easy: increment(1),
-      });
+      await updateDoc(userRef, data);
     } catch (e) {
       console.log("ERROR: ", e.message);
     }
   };
 
   const updateMediumStatistics = async () => {
+    var data = userDoc;
+    var newTimestamp = new Date();
+    newTimestamp.setDate(newTimestamp.getDate() + 2);
+    var timestamp = newTimestamp.getTime();
+
+    var index = userDoc.cards.findIndex((item) => item == cards[cardIndex]);
+
+    data.medium = data.medium + 1;
+    data.cards[index].timestamp = timestamp;
+
     try {
-      await updateDoc(userRef, {
-        medium: increment(1),
-      });
+      await updateDoc(userRef, data);
     } catch (e) {
       console.log("ERROR: ", e.message);
     }
   };
 
   const updateHardStatistics = async () => {
+    var data = userDoc;
+    var newTimestamp = new Date();
+    newTimestamp.setDate(newTimestamp.getDate() + 1);
+    var timestamp = newTimestamp.getTime();
+
+    var index = userDoc.cards.findIndex((item) => item == cards[cardIndex]);
+
+    data.hard = data.hard + 1;
+    data.cards[index].timestamp = timestamp;
+
     try {
-      await updateDoc(userRef, {
-        hard: increment(1),
-      });
+      await updateDoc(userRef, data);
     } catch (e) {
       console.log("ERROR: ", e.message);
     }
@@ -93,12 +122,20 @@ export default function QuizScreen({ route, navigation }) {
     setVisible(false);
   };
 
+  const goBack = () => navigation.goBack();
+
   const retryButton = () => {
     setRetry(retry + 1);
     hideAnswer();
     updateRetryStatistics();
 
-    if (cardIndex < cards.length - 1) setCardIndex(cardIndex + 1);
+    if (cardIndex < cards.length - 1) {
+      setCardIndex(cardIndex + 1);
+    }else{
+      setCards([{ answer: "", collection: "", quenstion: "", timestamp: 0 }]);
+      setCardIndex(0);
+      GetData();
+    }
   };
 
   const hardButton = () => {
@@ -106,7 +143,13 @@ export default function QuizScreen({ route, navigation }) {
     hideAnswer();
     updateHardStatistics();
 
-    if (cardIndex < cards.length - 1) setCardIndex(cardIndex + 1);
+    if (cardIndex < cards.length - 1) {
+      setCardIndex(cardIndex + 1);
+    }else{
+      setCards([{ answer: "", collection: "", quenstion: "", timestamp: 0 }]);
+      setCardIndex(0);
+      GetData();
+    }  
   };
 
   const mediumButton = () => {
@@ -114,7 +157,13 @@ export default function QuizScreen({ route, navigation }) {
     hideAnswer();
     updateMediumStatistics();
 
-    if (cardIndex < cards.length - 1) setCardIndex(cardIndex + 1);
+    if (cardIndex < cards.length - 1) {
+      setCardIndex(cardIndex + 1);
+    }else{
+      setCards([{ answer: "", collection: "", quenstion: "", timestamp: 0 }]);
+      setCardIndex(0);
+      GetData();
+    }
   };
 
   const easyButton = () => {
@@ -122,63 +171,119 @@ export default function QuizScreen({ route, navigation }) {
     hideAnswer();
     updateEasyStatistics();
 
-    if (cardIndex < cards.length - 1) setCardIndex(cardIndex + 1);
+    if (cardIndex < cards.length - 1) {
+      setCardIndex(cardIndex + 1);
+    }else{
+      setCards([{ answer: "", collection: "", quenstion: "", timestamp: 0 }]);
+      setCardIndex(0);
+      GetData();
+    }
   };
 
   return (
     <View style={styles.container} behavior="padding">
-      <View style={styles.row}>
-        <Text style={[styles.paddingHead, styles.retry_text]}>{retry}</Text>
-        <Text style={[styles.paddingHead, styles.hard_text]}>{hard}</Text>
-        <Text style={[styles.paddingHead, styles.medium_text]}>{medium}</Text>
-        <Text style={[styles.paddingHead, styles.easy_text]}>{easy}</Text>
-      </View>
-      <View style={styles.question_container}>
-        <Text style={styles.question_text}>{cards[cardIndex].quenstion}</Text>
-        <View style={styles.answer_container}>
-          {visible ? (
-            <Text style={styles.answer_text}>{cards[cardIndex].answer}</Text>
-          ) : null}
-          {!visible ? (
-            <TouchableOpacity style={[styles.buttom]} onPress={showAnswer}>
-              <Text style={[styles.buttomText]}>Show Answer</Text>
-            </TouchableOpacity>
-          ) : null}
+      {cards.length != 0 ? (
+        <View style={styles.container} behavior="padding">
+          <View style={styles.row}>
+            <Text style={[styles.paddingHead, styles.retry_text]}>{retry}</Text>
+            <Text style={[styles.paddingHead, styles.hard_text]}>{hard}</Text>
+            <Text style={[styles.paddingHead, styles.medium_text]}>
+              {medium}
+            </Text>
+            <Text style={[styles.paddingHead, styles.easy_text]}>{easy}</Text>
+          </View>
+          <View style={styles.question_container}>
+            <Text style={styles.question_text}>
+              {cards[cardIndex].quenstion}
+            </Text>
+            <View style={styles.answer_container}>
+              {visible ? (
+                <Text style={styles.answer_text}>
+                  {cards[cardIndex].answer}
+                </Text>
+              ) : null}
+              {!visible ? (
+                <TouchableOpacity style={[styles.buttom]} onPress={showAnswer}>
+                  <Text style={[styles.buttomText]}>Show Answer</Text>
+                </TouchableOpacity>
+              ) : null}
+            </View>
+          </View>
+          <View>
+            <View style={styles.row}>
+              <TouchableOpacity
+                style={[styles.retry_buttom]}
+                disabled={loading}
+                onPress={retryButton}
+              >
+                <Text style={[styles.buttomText]}>Retry</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.hard_buttom]}
+                disabled={loading}
+                onPress={hardButton}
+              >
+                <Text style={[styles.buttomText]}>Hard</Text>
+              </TouchableOpacity>
+            </View>
+            <View style={styles.row}>
+              <TouchableOpacity
+                style={[styles.medium_buttom]}
+                disabled={loading}
+                onPress={mediumButton}
+              >
+                <Text style={[styles.buttomText]}>Medium</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.easy_buttom]}
+                disabled={loading}
+                onPress={easyButton}
+              >
+                <Text style={[styles.buttomText]}>Easy</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
-      </View>
-      <View>
-        <View style={styles.row}>
-          <TouchableOpacity style={[styles.retry_buttom]} onPress={retryButton}>
-            <Text style={[styles.buttomText]}>Retry</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.hard_buttom]} onPress={hardButton}>
-            <Text style={[styles.buttomText]}>Hard</Text>
-          </TouchableOpacity>
-        </View>
-        <View style={styles.row}>
-          <TouchableOpacity
-            style={[styles.medium_buttom]}
-            onPress={mediumButton}
-          >
-            <Text style={[styles.buttomText]}>Medium</Text>
-          </TouchableOpacity>
-          <TouchableOpacity style={[styles.easy_buttom]} onPress={easyButton}>
-            <Text style={[styles.buttomText]}>Easy</Text>
+      ) : (
+        <View style={styles.center} behavior="padding">
+          <Text style={styles.congratulations_text}>
+            There are no more cards in this collection for today! Great work!
+          </Text>
+          <TouchableOpacity style={[styles.buttom]} onPress={goBack}>
+            <Text style={[styles.buttomText]}>Go Back</Text>
           </TouchableOpacity>
         </View>
-      </View>
+      )}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
-    paddingHorizontal: 10,
     paddingBottom: 40,
     flex: 1,
     justifyContent: "space-between",
     alignItems: "center",
     backgroundColor: "#ffffff",
+  },
+
+  center: {
+    paddingHorizontal: 10,
+    paddingBottom: 40,
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#ffffff",
+  },
+
+  congratulations_text: {
+    justifyContent: "center",
+    alignItems: "center",
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: 'black',
+    textAlign: 'center',
+    paddingBottom: 20
   },
 
   question_container: {
